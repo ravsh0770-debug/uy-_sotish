@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>HomeFinder</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- BODY START -->
+<header class="topbar">
+  <div class="wrap bar">
+    <a href="#top" class="logo">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 15 16 5l12 10v12H19v-8h-6v8H4z" fill="currentColor"/></svg>
+      Home<span>Finder</span>
+    </a>
+    <div class="account">
+      <span class="hello" id="hello" hidden></span>
+      <button type="button" class="btn ghost" id="signupBtn">Owner sign up</button>
+      <button type="button" class="btn cta" id="postBtn">+ Post<span class="long">&nbsp;a listing</span></button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="top">
+  <canvas class="skyline" id="skyline" aria-hidden="true"></canvas>
+  <div class="wrap hero-inner">
+    <p class="eyebrow"><span class="dot" aria-hidden="true"></span>Apartments · Houses · Commercial</p>
+    <h1>Every lit window is someone’s <em>next&nbsp;home.</em></h1>
+    <p class="lede">Buy or rent in Tashkent, Samarkand, Bukhara and cities across Uzbekistan. Filter by price, building height and the exact floor, then call the seller directly.</p>
+    <div class="quick" id="quickPicks">
+      <button type="button" class="pick" data-deal="sale" data-sub="apartment">Buy an apartment</button>
+      <button type="button" class="pick" data-deal="sale" data-sub="house">Buy a house</button>
+      <button type="button" class="pick" data-deal="rent" data-sub="short">Rent by the night</button>
+      <button type="button" class="pick" data-deal="rent" data-sub="long">Rent by the month</button>
+      <button type="button" class="pick" data-deal="sale" data-sub="commercial">Commercial space</button>
+    </div>
+    <dl class="stats">
+      <div><dt>For sale</dt><dd id="statSale">–</dd></div>
+      <div><dt>For rent</dt><dd id="statRent">–</dd></div>
+      <div><dt>Cities</dt><dd id="statDistricts">–</dd></div>
+    </dl>
+  </div>
+</section>
+
+<div class="wrap layout" id="listings">
+  <aside class="sidebar" id="sidebar" aria-label="Browse listings">
+    <div class="side-panel">
+    <p class="side-label">Browse</p>
+    <button type="button" class="cat" data-deal="all" aria-pressed="true"><span>All listings</span><span class="n"></span></button>
+
+    <button type="button" class="cat" id="saleBtn" data-deal="sale" aria-expanded="false" aria-controls="saleSub">
+      <span>For sale</span><span class="n"></span>
+    </button>
+    <div class="sub" id="saleSub" hidden>
+      <button type="button" class="subcat" data-deal="sale" data-sub="apartment"><span>Apartments</span><span class="n"></span></button>
+      <button type="button" class="subcat" data-deal="sale" data-sub="house"><span>Houses</span><span class="n"></span></button>
+      <button type="button" class="subcat" data-deal="sale" data-sub="commercial"><span>Commercial</span><span class="n"></span></button>
+    </div>
+
+    <button type="button" class="cat" id="rentBtn" data-deal="rent" aria-expanded="false" aria-controls="rentSub">
+      <span>For rent</span><span class="n"></span>
+    </button>
+    <div class="sub" id="rentSub" hidden>
+      <button type="button" class="subcat" data-deal="rent" data-sub="short"><span>Short-term<small>By the night</small></span><span class="n"></span></button>
+      <button type="button" class="subcat" data-deal="rent" data-sub="long"><span>Long-term<small>By the month</small></span><span class="n"></span></button>
+    </div>
+    <div class="side-divider" role="presentation"></div>
+
+    <button type="button" class="cat" id="filterBtn" aria-expanded="true" aria-controls="filterForm">
+      <span class="with-icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        Filters
+      </span>
+      <span class="n active-count" id="filterCount" hidden></span>
+    </button>
+    <form class="filter-panel" id="filterForm" autocomplete="off">
+      <div class="field">
+        <span class="label" id="currencyLabel">Currency</span>
+        <div class="seg" id="currencySwitch" role="group" aria-labelledby="currencyLabel">
+          <button type="button" class="seg-btn" data-currency="USD" aria-pressed="true">$ US dollar</button>
+          <button type="button" class="seg-btn" data-currency="UZS" aria-pressed="false">So'm</button>
+        </div>
+        <p class="hint" id="rateHint"></p>
+      </div>
+      <div class="field">
+        <label for="fCity">City</label>
+        <select id="fCity"><option value="all">All cities</option></select>
+      </div>
+      <div class="field">
+        <label for="fDistrict">District</label>
+        <select id="fDistrict"></select>
+      </div>
+
+      <div class="slider-field">
+        <div class="slider-head"><span class="label" id="priceLabel">Price</span><output id="priceValue" for="priceLo priceHi">Any price</output></div>
+        <div class="dual" role="group" aria-labelledby="priceLabel">
+          <div class="track"><div class="fill" id="priceFill"></div></div>
+          <input type="range" id="priceLo" aria-label="Lowest price" value="0">
+          <input type="range" id="priceHi" aria-label="Highest price" value="0">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="fBuilding">Building</label>
+        <select id="fBuilding">
+          <option value="any">New and old</option>
+          <option value="new">New build</option>
+          <option value="old">Old building</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="label" id="areaLabel">Area, m²</span>
+        <div class="range" role="group" aria-labelledby="areaLabel">
+          <input type="number" id="fAreaMin" min="1" max="10000" step="1" placeholder="From" inputmode="numeric" aria-label="Area from, square metres">
+          <span aria-hidden="true">–</span>
+          <input type="number" id="fAreaMax" min="1" max="10000" step="1" placeholder="To" inputmode="numeric" aria-label="Area to, square metres">
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="storeysLabel">Storeys in building</span>
+        <div class="range" role="group" aria-labelledby="storeysLabel">
+          <input type="number" id="fStoreysMin" min="1" max="200" step="1" placeholder="From" inputmode="numeric" aria-label="Storeys from">
+          <span aria-hidden="true">–</span>
+          <input type="number" id="fStoreysMax" min="1" max="200" step="1" placeholder="To" inputmode="numeric" aria-label="Storeys to">
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="floorLabel">Floor</span>
+        <div class="range" role="group" aria-labelledby="floorLabel">
+          <input type="number" id="fFloorMin" min="1" max="200" step="1" placeholder="From" inputmode="numeric" aria-label="Floor from">
+          <span aria-hidden="true">–</span>
+          <input type="number" id="fFloorMax" min="1" max="200" step="1" placeholder="To" inputmode="numeric" aria-label="Floor to">
+        </div>
+        <label class="check"><input type="checkbox" id="fNotFirst"> Not first floor</label>
+        <label class="check"><input type="checkbox" id="fNotTop"> Not top floor</label>
+      </div>
+
+      <button type="button" class="btn ghost-dark" id="resetBtn">Reset filters</button>
+    </form>
+    </div>
+
+    <!-- Advertisement slot (left). Replace the text below with your advertiser's content. -->
+    <div class="ad ad-promo" role="complementary" aria-label="Advertisement">
+      <span class="ad-label">Ad</span>
+      <div class="ad-art ad-art-keys" aria-hidden="true"></div>
+      <p class="ad-title">Advertise on HomeFinder</p>
+      <p class="ad-text">Put your agency, moving or renovation business in front of people who are looking for a home right now.</p>
+      <a class="ad-cta" href="#contact">Book this space</a>
+    </div>
+  </aside>
+
+  <main class="content">
+  <div class="status">
+    <div>
+      <h2 class="view-title" id="viewTitle">All listings</h2>
+      <p class="count" id="count">Loading listings…</p>
+    </div>
+    <div class="sort">
+      <div class="search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input type="search" id="fSearch" placeholder="Search listings" aria-label="Search listings by title, city, district or type" autocomplete="off">
+      </div>
+      <label for="fSort">Sort by</label>
+      <select id="fSort">
+        <option value="new">Newest first</option>
+        <option value="price-asc">Price: lowest first</option>
+        <option value="price-desc">Price: highest first</option>
+        <option value="ppm-asc">Price per m²: lowest</option>
+        <option value="likes">Most liked</option>
+        <option value="views">Most viewed</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="empty" id="empty" hidden>
+    <h3 id="emptyTitle">No listings match these filters</h3>
+    <p id="emptyText">Widen the price range or clear the floor filters.</p>
+  </div>
+  </main>
+
+  <!-- Advertisement column (right). These are sample ads: replace them with real advertisers. -->
+  <aside class="ad-rail" aria-label="Advertisements">
+    <div class="ad">
+      <span class="ad-label">Sample ad</span>
+      <div class="ad-art ad-art-truck" aria-hidden="true"><span>Moving day, sorted.</span></div>
+      <p class="ad-title">Northline Movers</p>
+      <p class="ad-text">Apartment moves across the city, packing included. Free quote by phone.</p>
+      <p class="ad-contact">+1 555 0142</p>
+    </div>
+    <div class="ad">
+      <span class="ad-label">Sample ad</span>
+      <div class="ad-art ad-art-loan" aria-hidden="true"><span>Own it sooner.</span></div>
+      <p class="ad-title">Harbor Home Loans</p>
+      <p class="ad-text">Talk to a mortgage advisor before you make an offer. Pre-approval in 48 hours.</p>
+      <p class="ad-contact">+1 555 0178</p>
+    </div>
+    <div class="ad">
+      <span class="ad-label">Sample ad</span>
+      <div class="ad-art ad-art-paint" aria-hidden="true"><span>Fresh walls, new start.</span></div>
+      <p class="ad-title">Atelier Interiors</p>
+      <p class="ad-text">Painting, flooring and kitchen refits for newly bought homes.</p>
+      <p class="ad-contact">+1 555 0195</p>
+    </div>
+  </aside>
+</div>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <span class="logo-foot">Home<span>Finder</span></span>
+    <span>Listings are posted by sellers. Contact them directly using the phone number on each listing.</span>
+    <span>Advertising: ads@homefinder.example · +1 555 0100</span>
+  </div>
+</footer>
+
+<!-- Sign up -->
+<dialog id="signupDialog" aria-labelledby="signupTitle">
+  <form id="signupForm" class="dlg" novalidate>
+    <div class="dlg-head">
+      <p class="dlg-eyebrow">For property owners</p>
+      <h2 id="signupTitle">Sign up as an owner</h2>
+      <p class="muted" id="signupNote">Owners sign up to post listings. Buyers see your name and phone number on every listing you post.</p>
+    </div>
+    <div class="dlg-body form-grid">
+      <div class="field">
+        <label for="sFirst">First name</label>
+        <input id="sFirst" required maxlength="40" autocomplete="given-name" placeholder="e.g. Aziz">
+      </div>
+      <div class="field">
+        <label for="sLast">Surname</label>
+        <input id="sLast" required maxlength="40" autocomplete="family-name" placeholder="e.g. Karimov">
+      </div>
+      <div class="field span2">
+        <label for="sPhone">Phone number</label>
+        <input id="sPhone" type="tel" required maxlength="25" autocomplete="tel" inputmode="tel" placeholder="+998 90 123 45 67">
+      </div>
+      <p class="form-error span2" id="signupError" hidden></p>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost-dark" data-close>Cancel</button>
+      <button type="submit" class="btn cta" id="signupSubmit">Sign up as owner</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Post a listing -->
+<dialog id="postDialog" aria-labelledby="postTitle">
+  <form id="postForm" class="dlg" novalidate>
+    <div class="dlg-head">
+      <h2 id="postTitle">Post a listing</h2>
+      <p class="muted" id="postAs"></p>
+    </div>
+    <div class="dlg-body form-grid">
+      <div class="field span2">
+        <label for="pTitle">Headline</label>
+        <input id="pTitle" required maxlength="70" placeholder="e.g. Bright 2-bed apartment near the park">
+      </div>
+      <div class="field">
+        <label for="pDeal">Listing for</label>
+        <select id="pDeal">
+          <option value="sale">Sale</option>
+          <option value="rent">Rent</option>
+        </select>
+      </div>
+      <div class="field" id="pTermField" hidden>
+        <label for="pTerm">Rental period</label>
+        <select id="pTerm">
+          <option value="long">Long-term (monthly)</option>
+          <option value="short">Short-term (nightly)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="pType">Property type</label>
+        <select id="pType"></select>
+      </div>
+      <div class="field">
+        <label for="pBuilding">Building</label>
+        <select id="pBuilding">
+          <option value="">Choose new or old</option>
+          <option value="new">New build</option>
+          <option value="old">Old building</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="pCity">City</label>
+        <select id="pCity"></select>
+      </div>
+      <div class="field">
+        <label for="pDistrict">District</label>
+        <select id="pDistrict"></select>
+      </div>
+      <div class="field">
+        <label for="pPrice" id="pPriceLabel">Price, $</label>
+        <div class="price-input">
+          <select id="pCurrency" aria-label="Currency of the price">
+            <option value="USD">$</option>
+            <option value="UZS">So'm</option>
+          </select>
+        <input id="pPrice" type="number" required min="1000" step="1000" inputmode="numeric" placeholder="250000">
+        </div>
+      </div>
+      <div class="field">
+        <label for="pArea">Area, m²</label>
+        <input id="pArea" type="number" required min="5" max="5000" inputmode="numeric" placeholder="72">
+      </div>
+      <div class="field">
+        <label for="pRooms">Rooms</label>
+        <input id="pRooms" type="number" required min="1" max="30" inputmode="numeric" placeholder="2">
+      </div>
+      <div class="field">
+        <label for="pStoreys" id="pStoreysLabel">Storeys in building</label>
+        <input id="pStoreys" type="number" required min="1" max="200" inputmode="numeric" placeholder="9">
+      </div>
+      <div class="field" id="pFloorField">
+        <label for="pFloor" id="pFloorLabel">Apartment floor</label>
+        <input id="pFloor" type="number" min="1" max="200" inputmode="numeric" placeholder="4">
+      </div>
+      <div class="field span2">
+        <label for="pDesc">Description</label>
+        <textarea id="pDesc" rows="3" maxlength="800" placeholder="Renovated kitchen, south-facing balcony, 5 minutes to the metro…"></textarea>
+      </div>
+      <div class="field span2" id="pPhotoField">
+        <label for="pPhoto">Photo <span class="opt">(optional)</span></label>
+        <div class="photo-pick">
+          <img id="pPreview" alt="Selected photo preview" hidden>
+          <input id="pPhoto" type="file" accept="image/png,image/jpeg,image/webp">
+        </div>
+      </div>
+      <p class="form-error span2" id="postError" hidden></p>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn ghost-dark" data-close>Cancel</button>
+      <button type="submit" class="btn cta" id="postSubmit">Publish listing</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Listing details -->
+<dialog id="detailDialog" aria-label="Listing details">
+  <div class="dlg" id="detailBody"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<!-- BODY END -->
+  <script src="stress-test.js"></script>
+  <script src="sample-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
