@@ -1,0 +1,6 @@
+# Lokal ma'lumotlar bazasi (avtomatik yaratiladi)
+backend/uylar.db
+__pycache__/
+*.pyc
+.DS_Store
+.claude/settings.local.json

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Toshkent Uy Narxlari</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <span class="brand-mark">⌂</span>
+        <div>
+          <h1>Toshkent Uy Narxlari</h1>
+          <p>Tumanlar bo'yicha kvartira narxlarini solishtiring</p>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button class="tab active" data-tab="listings">E'lonlar</button>
+        <button class="tab" data-tab="stats">Tumanlar statistikasi</button>
+        <button class="tab" data-tab="compare">Solishtirish <span id="compare-count" class="pill" hidden>0</span></button>
+        <button class="tab" data-tab="add">+ E'lon qo'shish</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- E'LONLAR -->
+    <section id="tab-listings" class="panel">
+      <form id="filters" class="filters">
+        <label>Tuman
+          <select name="district"><option value="">Barchasi</option></select>
+        </label>
+        <label>Xonalar
+          <select name="rooms">
+            <option value="">Barchasi</option>
+            <option value="1">1</option><option value="2">2</option>
+            <option value="3">3</option><option value="4">4</option>
+            <option value="5">5+</option>
+          </select>
+        </label>
+        <label>Narx dan ($)
+          <input name="min_price" type="number" min="0" step="1000" placeholder="0">
+        </label>
+        <label>Narx gacha ($)
+          <input name="max_price" type="number" min="0" step="1000" placeholder="∞">
+        </label>
+        <label>Bino turi
+          <select name="building_type">
+            <option value="">Barchasi</option>
+            <option value="yangi">Yangi bino</option>
+            <option value="ikkilamchi">Ikkilamchi</option>
+          </select>
+        </label>
+        <label>Ta'mir
+          <select name="renovation">
+            <option value="">Barchasi</option>
+            <option value="yevro">Yevro ta'mir</option>
+            <option value="oddiy">Oddiy</option>
+            <option value="tamirsiz">Ta'mirsiz</option>
+          </select>
+        </label>
+        <label>Saralash
+          <select name="sort">
+            <option value="newest">Eng yangilari</option>
+            <option value="price_asc">Arzonroq</option>
+            <option value="price_desc">Qimmatroq</option>
+            <option value="ppm_asc">$/m² — arzonroq</option>
+            <option value="ppm_desc">$/m² — qimmatroq</option>
+            <option value="area_desc">Kattaroq maydon</option>
+          </select>
+        </label>
+        <button type="reset" class="btn ghost">Tozalash</button>
+      </form>
+
+      <p id="listings-summary" class="muted"></p>
+      <div id="listings" class="grid"></div>
+    </section>
+
+    <!-- STATISTIKA -->
+    <section id="tab-stats" class="panel" hidden>
+      <div id="stat-tiles" class="tiles"></div>
+      <div class="card-block">
+        <h2>O'rtacha narx, $ / m² (tumanlar bo'yicha)</h2>
+        <p class="muted">Chiziq — o'rtacha qiymat, kulrang soha — eng arzon va eng qimmat e'lon oralig'i.</p>
+        <div id="district-chart" class="bars"></div>
+      </div>
+      <div class="card-block">
+        <h2>Xonalar soni bo'yicha</h2>
+        <div class="table-wrap"><table id="rooms-table" class="table"></table></div>
+      </div>
+    </section>
+
+    <!-- SOLISHTIRISH -->
+    <section id="tab-compare" class="panel" hidden>
+      <div id="compare-view"></div>
+    </section>
+
+    <!-- QO'SHISH -->
+    <section id="tab-add" class="panel" hidden>
+      <form id="add-form" class="card-block form" novalidate>
+        <h2>Yangi e'lon qo'shish</h2>
+        <div class="form-grid">
+          <label class="span-2">Sarlavha (ixtiyoriy)
+            <input name="title" maxlength="120" placeholder="Masalan: 3 xonali kvartira, metro yonida">
+          </label>
+          <label>Tuman *
+            <select name="district" required><option value="">Tanlang</option></select>
+          </label>
+          <label>Xonalar soni *
+            <input name="rooms" type="number" min="1" max="10" required>
+          </label>
+          <label>Maydon (m²) *
+            <input name="area" type="number" min="10" step="0.1" required>
+          </label>
+          <label>Narx ($) *
+            <input name="price" type="number" min="1000" step="500" required>
+          </label>
+          <label>Qavat *
+            <input name="floor" type="number" min="1" required>
+          </label>
+          <label>Umumiy qavatlar *
+            <input name="total_floors" type="number" min="1" required>
+          </label>
+          <label>Bino turi *
+            <select name="building_type" required>
+              <option value="">Tanlang</option>
+              <option value="yangi">Yangi bino</option>
+              <option value="ikkilamchi">Ikkilamchi</option>
+            </select>
+          </label>
+          <label>Ta'mir *
+            <select name="renovation" required>
+              <option value="">Tanlang</option>
+              <option value="yevro">Yevro ta'mir</option>
+              <option value="oddiy">Oddiy</option>
+              <option value="tamirsiz">Ta'mirsiz</option>
+            </select>
+          </label>
+          <label class="span-2">Tavsif
+            <textarea name="description" rows="3" maxlength="1000"></textarea>
+          </label>
+        </div>
+        <p id="ppm-preview" class="muted"></p>
+        <p id="form-message" class="form-message" hidden></p>
+        <button type="submit" class="btn primary">Saqlash</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="compare-bar" class="compare-bar" hidden>
+    <span id="compare-bar-text"></span>
+    <button id="compare-go" class="btn primary">Solishtirish</button>
+    <button id="compare-clear" class="btn ghost">Tozalash</button>
+  </div>
+
+  <footer class="wrap footer muted">Namunaviy ma'lumotlar taxminiy — haqiqiy bozor narxlari emas.</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
